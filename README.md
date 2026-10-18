@@ -1,25 +1,41 @@
 # OpenLedger
 
-OpenLedger is a privacy-first, self-hosted personal finance dashboard.
+**Privacy-first, self-hosted personal finance dashboard.**
+
+Your bank data shouldn't have to live on someone else's cloud to be useful. OpenLedger runs entirely on your own hardware: it syncs accounts via Plaid, stores everything in your Postgres, and renders it in a dashboard only you can reach.
 
 ## Architecture
 
-- Frontend: Next.js 14 application that renders dashboard UX.
-- Backend: FastAPI service for auth, integrations, sync, and analytics.
-- Data: PostgreSQL for durable records and Redis for cache/job state.
+- **Frontend** — Next.js 14: dashboard UX, authenticated workflows, normalized view models. Never persists provider tokens in browser storage.
+- **Backend** — FastAPI: auth, connector orchestration, sync scheduling, analytics, and a plugin system for new data sources.
+- **Data** — PostgreSQL for durable financial records + historical snapshots; Redis for job / sync state and cache.
 
-## Quick Start
+Full detail: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · Security model: [`docs/SECURITY.md`](docs/SECURITY.md) (bcrypt passwords, Fernet-encrypted provider tokens, httpOnly secure cookies, localhost-bound by default)
 
-1. Copy environment template: `cp .env.example .env`
-2. Start services: `docker compose up -d`
-3. Open frontend: [http://localhost:3000](http://localhost:3000)
+## Quick start
 
-## Repository Layout
+```bash
+cp .env.example .env   # fill in JWT_SECRET, ENCRYPTION_KEY, Plaid + Splitwise credentials
+docker compose up -d --build
+# → http://localhost:3000
+```
 
-- `backend/` - FastAPI app and migrations.
-- `frontend/` - Next.js app.
-- `docs/` - setup, security, plugin, and contribution guides.
+Prerequisites and full walkthrough: [`docs/SETUP.md`](docs/SETUP.md)
 
-## Contracts
+## Repository layout
 
-- Service boundary and request/data flow details: `docs/ARCHITECTURE.md`
+- `backend/` — FastAPI app, migrations, plugin contract (`backend/app/plugins/`)
+- `frontend/` — Next.js app
+- `docs/` — architecture, setup, security, plugins, contributing
+
+## Plugins
+
+New importers/connectors ship as plugins without touching core: identity + connect validation + account/transaction sync + balance fetch. See [`docs/PLUGINS.md`](docs/PLUGINS.md).
+
+## Contributing
+
+Scoped branches, tests with behavior changes, short test plan in the PR — [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md).
+
+## License
+
+MIT — see [LICENSE](LICENSE).
